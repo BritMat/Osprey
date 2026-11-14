@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-probe-preview"
+description = "Enables the probe_preview command without any pre-configured scope."
+commands.allow = ["probe_preview"]
+
+[[permission]]
+identifier = "deny-probe-preview"
+description = "Denies the probe_preview command without any pre-configured scope."
+commands.deny = ["probe_preview"]

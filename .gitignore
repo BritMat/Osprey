@@ -1,0 +1,20 @@
+/target
+**/*.rs.bk
+.osprey-*/
+.bmf-*/
+*.part
+*.osprey.json
+*.bmf.json
+/test-stream
+.DS_Store
+.vscode/
+.idea/
+logs/
+osprey-results-*.zip
+bmf-results-*.zip
+
+# Tauri writes these when building
+crates/osprey-app/gen/schemas/
+
+# Third party user scripts for local testing, not ours to publish.
+samples/userscripts/

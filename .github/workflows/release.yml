@@ -1,0 +1,53 @@
+name: Release
+
+# Push a tag like v0.1.0 and this builds osprey for every platform and
+# attaches the binaries to a GitHub release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, exe: osprey, browser: bm-osprey }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, exe: osprey.exe, browser: bm-osprey.exe }
+          - { os: macos-latest, target: aarch64-apple-darwin, exe: osprey, browser: bm-osprey }
+          - { os: macos-13, target: x86_64-apple-darwin, exe: osprey, browser: bm-osprey }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Linux libraries for the browser (WebKitGTK)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev librsvg2-dev libayatana-appindicator3-dev
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }} -p osprey-cli -p osprey-app
+      - name: Package
+        shell: bash
+        run: |
+          name="osprey-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          mkdir "$name"
+          cp "target/${{ matrix.target }}/release/${{ matrix.exe }}" "target/${{ matrix.target }}/release/${{ matrix.browser }}" README.md LICENSE "$name/"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            7z a "$name.zip" "$name" > /dev/null
+            echo "ASSET=$name.zip" >> "$GITHUB_ENV"
+          else
+            tar czf "$name.tar.gz" "$name"
+            echo "ASSET=$name.tar.gz" >> "$GITHUB_ENV"
+          fi
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET }}
+          generate_release_notes: true

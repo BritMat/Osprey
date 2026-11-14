@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-script-answer"
+description = "Enables the script_answer command without any pre-configured scope."
+commands.allow = ["script_answer"]
+
+[[permission]]
+identifier = "deny-script-answer"
+description = "Denies the script_answer command without any pre-configured scope."
+commands.deny = ["script_answer"]

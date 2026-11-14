@@ -1,0 +1,51 @@
+! BM Osprey built in filters
+! A small starter set so filtering works before any list is downloaded.
+! Run `osprey filters update` for the full EasyList and uBlock Origin lists.
+! Syntax is the same as uBlock Origin and Adblock Plus.
+
+! Ad and video ad networks
+||doubleclick.net^
+||googlesyndication.com^
+||googleadservices.com^
+||imasdk.googleapis.com^
+||amazon-adsystem.com^
+||adnxs.com^
+||adform.net^
+||criteo.com^
+||criteo.net^
+||taboola.com^
+||outbrain.com^
+||popads.net^
+||popcash.net^
+||propellerads.com^
+||adsterra.com^
+||exoclick.com^
+||exosrv.com^
+||juicyads.com^
+||trafficjunky.net^
+||trafficstars.com^
+||spotxchange.com^
+||springserve.com^
+||teads.tv^
+||vidoomy.com^
+||moatads.com^
+||adcolony.com^
+||unityads.unity3d.com^
+
+! Trackers
+||google-analytics.com^
+||googletagmanager.com^
+||scorecardresearch.com^
+||quantserve.com^
+||hotjar.com^
+||clarity.ms^
+
+! Common ad containers (used by text-only mode)
+##.adsbygoogle
+##.advertisement
+##.ad-container
+##.ad-banner
+##.ad-slot
+##.sponsored-content
+##[id^="google_ads_"]
+##[id^="div-gpt-ad"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-script-toggle"
+description = "Enables the script_toggle command without any pre-configured scope."
+commands.allow = ["script_toggle"]
+
+[[permission]]
+identifier = "deny-script-toggle"
+description = "Denies the script_toggle command without any pre-configured scope."
+commands.deny = ["script_toggle"]

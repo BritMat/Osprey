@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = ["crates/osprey-core", "crates/osprey-cli", "crates/osprey-app"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Bristo Mathew <reach.bristo@gmail.com>"]
+repository = "https://github.com/BritMat/bm-osprey"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "gzip", "socks"] }
+futures = "0.3"
+url = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+anyhow = "1"
+
+[profile.release]
+lto = "thin"
+strip = true
+
+# A release build that costs less disk and time, for testing a build on a
+# machine that is short of space. `cargo build --profile fast`, or `dev fast`.
+# The result lands in target\fast. It runs a little slower than a real
+# release build, so ship from `--release`.
+[profile.fast]
+inherits = "release"
+opt-level = 2
+lto = false
+codegen-units = 16
+incremental = false
+debug = false
+strip = true
+
+[profile.fast.package."*"]
+opt-level = 1
+
+# Lighter debug builds. Full debug info for every library makes the
+# compiler use a lot more memory and disk, and is not needed here. Crash
+# reports still get file and line numbers for our own code.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false

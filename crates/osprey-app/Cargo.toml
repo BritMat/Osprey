@@ -1,0 +1,51 @@
+[package]
+name = "osprey-app"
+description = "BM Osprey browser: private browsing with media grabbing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "bm-osprey"
+path = "src/main.rs"
+
+[dependencies]
+osprey-core = { path = "../osprey-core" }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+url.workspace = true
+anyhow.workspace = true
+reqwest.workspace = true
+futures.workspace = true
+tauri = { version = "2.12.5", features = ["unstable", "webview-data-url"] }
+dirs = "7.0.0"
+regex = "1"
+base64 = "0.23.1"
+hex = "0.4"
+getrandom = "0.3"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "0.18"
+# Native request capture on Linux. Same version as Tauri uses.
+webkit2gtk = "=2.0.2"
+
+# Native request capture on Windows. Keep these on the versions Tauri uses,
+# its web view handle has to be the same type.
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39"
+windows-core = "0.62"
+
+[build-dependencies]
+tauri-build = "2.7.4"
+
+# Without this, macOS would silently ignore the tab proxy and pages would
+# bypass the gateway (no route protection, no ad blocking). It needs
+# macOS 14 or newer.
+[target.'cfg(target_os = "macos")'.dependencies]
+tauri = { version = "2.12.5", features = ["unstable", "webview-data-url", "macos-proxy"] }
+
+[dev-dependencies]
+tempfile = "3"

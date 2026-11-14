@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-bypass-key-set"
+description = "Enables the bypass_key_set command without any pre-configured scope."
+commands.allow = ["bypass_key_set"]
+
+[[permission]]
+identifier = "deny-bypass-key-set"
+description = "Denies the bypass_key_set command without any pre-configured scope."
+commands.deny = ["bypass_key_set"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-filters-update"
+description = "Enables the filters_update command without any pre-configured scope."
+commands.allow = ["filters_update"]
+
+[[permission]]
+identifier = "deny-filters-update"
+description = "Denies the filters_update command without any pre-configured scope."
+commands.deny = ["filters_update"]

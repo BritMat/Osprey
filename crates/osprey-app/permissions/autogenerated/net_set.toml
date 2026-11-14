@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-net-set"
+description = "Enables the net_set command without any pre-configured scope."
+commands.allow = ["net_set"]
+
+[[permission]]
+identifier = "deny-net-set"
+description = "Denies the net_set command without any pre-configured scope."
+commands.deny = ["net_set"]

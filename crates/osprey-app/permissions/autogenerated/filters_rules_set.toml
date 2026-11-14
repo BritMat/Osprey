@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-filters-rules-set"
+description = "Enables the filters_rules_set command without any pre-configured scope."
+commands.allow = ["filters_rules_set"]
+
+[[permission]]
+identifier = "deny-filters-rules-set"
+description = "Denies the filters_rules_set command without any pre-configured scope."
+commands.deny = ["filters_rules_set"]

@@ -1,0 +1,21 @@
+[package]
+name = "osprey-cli"
+description = "Command line front end for BM Osprey"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "osprey"
+path = "src/main.rs"
+
+[dependencies]
+osprey-core = { path = "../osprey-core" }
+tokio.workspace = true
+anyhow.workspace = true
+url.workspace = true
+serde_json.workspace = true
+clap = { version = "4", features = ["derive"] }
+indicatif = "0.17"

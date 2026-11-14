@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-script-install"
+description = "Enables the script_install command without any pre-configured scope."
+commands.allow = ["script_install"]
+
+[[permission]]
+identifier = "deny-script-install"
+description = "Denies the script_install command without any pre-configured scope."
+commands.deny = ["script_install"]

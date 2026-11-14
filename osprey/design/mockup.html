@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BM Osprey look</title>
+<style>
+/* ------------------------------------------------------------------
+   BM Osprey design tokens. Port this :root block into ui/app.css.
+   Sea at dusk: deep water, teal light, one warm amber accent.
+   No web fonts and no WebGL: the app is offline and must stay light.
+------------------------------------------------------------------ */
+:root {
+  --abyss: #060b18;         /* window background */
+  --deep: #0b1730;          /* chrome */
+  --shelf: #12213f;         /* raised surfaces */
+  --shelf-2: #1a2d52;
+  --line: rgba(255,255,255,.09);
+  --line-strong: rgba(255,255,255,.16);
+  --text: #eaf2ff;
+  --muted: #93a4c4;
+  --faint: #5d6e90;
+  --teal: #22e3c4;
+  --sky: #4aa8ff;
+  --amber: #ffb547;
+  --danger: #ff6b7a;
+  --accent: linear-gradient(100deg, var(--teal), var(--sky));
+  --hot: linear-gradient(100deg, #ffd27a, #ff9d2e);
+  --radius: 14px;
+  --radius-sm: 9px;
+  /* depth: a top highlight plus two shadows makes a surface look raised */
+  --raise: inset 0 1px 0 rgba(255,255,255,.10), 0 1px 2px rgba(0,0,0,.4), 0 10px 24px -8px rgba(0,0,0,.55);
+  --raise-hi: inset 0 1px 0 rgba(255,255,255,.16), 0 2px 4px rgba(0,0,0,.45), 0 18px 36px -10px rgba(0,0,0,.7);
+  --press: inset 0 2px 5px rgba(0,0,0,.5);
+  --glow: 0 0 18px rgba(34,227,196,.45);
+  --blur: blur(18px) saturate(140%);
+  --font: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --mono: "Cascadia Code", "SF Mono", Consolas, monospace;
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+:root[data-theme="ember"] { --teal: #ffb547; --sky: #ff6b7a; --amber: #22e3c4; --glow: 0 0 18px rgba(255,157,46,.45); }
+:root[data-theme="aurora"] { --teal: #7cf29a; --sky: #a78bfa; --glow: 0 0 18px rgba(124,242,154,.4); }
+:root[data-theme="slate"] { --abyss:#0c0d10; --deep:#15171c; --shelf:#1d2027; --shelf-2:#272b34; --teal:#9fb4d8; --sky:#d5deee; --glow: none; }
+/* "Reduce effects": no blur, no animation, flat shadows */
+:root.calm { --blur: none; --raise: inset 0 0 0 1px var(--line); --raise-hi: inset 0 0 0 1px var(--line-strong); --glow: none; }
+:root.calm *, :root.calm *::before, :root.calm *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--abyss); color: var(--text); font: 13px/1.45 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.win { display: grid; grid-template-rows: 40px 46px 1fr; height: 100vh; }
+
+/* ---------- title bar with tabs ---------- */
+.tabs { display: flex; align-items: flex-end; gap: 4px; padding: 0 8px 0 10px; background: linear-gradient(#0d1b38, var(--deep)); }
+.brand { align-self: center; width: 22px; height: 22px; margin-right: 6px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.tab { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px 0 12px; max-width: 220px; border-radius: 10px 10px 0 0; color: var(--muted); }
+.tab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab.on { color: var(--text); background: var(--shelf); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), inset 0 2px 0 -1px var(--teal); }
+.tab .fav { width: 14px; height: 14px; border-radius: 4px; background: var(--hot); flex: none; }
+.tab .n { font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 99px; color: #04231d; background: var(--accent); }
+.tabs .add { align-self: center; width: 28px; height: 28px; border-radius: 8px; color: var(--muted); display: grid; place-items: center; }
+.tabs .add:hover, .wbtn:hover { background: rgba(255,255,255,.08); color: var(--text); }
+.wctl { margin-left: auto; align-self: stretch; display: flex; }
+.wbtn { width: 44px; display: grid; place-items: center; color: var(--muted); }
+.wbtn.x:hover { background: #e5484d; color: #fff; }
+
+/* ---------- toolbar ---------- */
+.bar { display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--shelf); border-bottom: 1px solid rgba(0,0,0,.5); box-shadow: 0 6px 18px -8px rgba(0,0,0,.7); position: relative; z-index: 3; }
+.ib { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; color: var(--muted); position: relative; transition: transform .15s var(--ease), background .15s; }
+.ib:hover { background: rgba(255,255,255,.08); color: var(--text); transform: translateY(-1px); }
+.ib:active { transform: translateY(0); box-shadow: var(--press); }
+.ib.on { color: var(--teal); background: rgba(34,227,196,.12); }
+.ib .dot { position: absolute; top: 2px; right: 1px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 99px; font-size: 10px; font-weight: 700; line-height: 15px; color: #04231d; background: var(--accent); box-shadow: var(--glow); }
+.addr { flex: 1; display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 99px; background: rgba(0,0,0,.35); box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.06); font-family: var(--mono); font-size: 12px; color: var(--text); }
+.addr svg { color: var(--teal); width: 13px; height: 13px; }
+.addr em { font-style: normal; color: var(--faint); }
+.route { display: flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; border-radius: 99px; font-weight: 600; background: rgba(34,227,196,.10); box-shadow: inset 0 0 0 1px rgba(34,227,196,.3); }
+.route i { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: var(--glow); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
+
+/* ---------- content ---------- */
+.body { display: grid; grid-template-columns: 1fr 392px; min-height: 0; position: relative; }
+.page { position: relative; overflow: hidden; background:
+  radial-gradient(900px 500px at 15% -10%, rgba(74,168,255,.18), transparent 60%),
+  radial-gradient(700px 500px at 110% 110%, rgba(34,227,196,.14), transparent 60%), #0a1122; padding: 28px 34px; }
+.page h1 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.01em; }
+.page p { margin: 0 0 18px; color: var(--muted); max-width: 60ch; }
+.player { aspect-ratio: 16/9; max-width: 720px; border-radius: 16px; position: relative; overflow: hidden; box-shadow: var(--raise-hi);
+  background: linear-gradient(160deg, #1b3c6e, #0c1a36 55%, #2a1740); }
+.player::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 70% 30%, rgba(255,181,71,.35), transparent 45%); }
+.player .play { position: absolute; inset: 0; margin: auto; width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.14); backdrop-filter: var(--blur); box-shadow: var(--raise-hi); }
+.player .play svg { width: 26px; height: 26px; fill: #fff; stroke: none; margin-left: 4px; }
+.player .track { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 4px; border-radius: 9px; background: rgba(255,255,255,.2); }
+.player .track i { display: block; width: 38%; height: 100%; border-radius: 9px; background: var(--accent); box-shadow: var(--glow); }
+
+/* ---------- side panel: glass, floating above the page ---------- */
+.panel { margin: 10px 10px 10px 0; border-radius: 18px; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  background: linear-gradient(180deg, rgba(26,45,82,.86), rgba(11,23,48,.92)); backdrop-filter: var(--blur); box-shadow: var(--raise-hi), inset 0 0 0 1px var(--line); }
+.seg { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; margin: 10px; padding: 4px; border-radius: 12px; background: rgba(0,0,0,.35); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); }
+.seg button { height: 30px; border-radius: 9px; color: var(--muted); font-weight: 600; transition: all .2s var(--ease); }
+.seg button.on { color: var(--text); background: linear-gradient(180deg, var(--shelf-2), var(--shelf)); box-shadow: var(--raise); }
+.scroll { overflow-y: auto; padding: 2px 10px 14px; min-height: 0; }
+.scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 9px; }
+
+.group > summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 10px 6px 8px; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary svg { width: 12px; height: 12px; transition: transform .2s var(--ease); }
+.group[open] > summary svg { transform: rotate(90deg); }
+.group > summary b { margin-left: auto; font-weight: 700; letter-spacing: 0; padding: 0 7px; border-radius: 99px; background: rgba(255,255,255,.08); color: var(--text); }
+
+.card { border-radius: var(--radius); padding: 10px; margin-bottom: 10px; background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)); box-shadow: var(--raise); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: var(--raise-hi); }
+.head { display: flex; gap: 10px; }
+.thumb { width: 96px; aspect-ratio: 16/9; border-radius: 9px; flex: none; position: relative; overflow: hidden; background: linear-gradient(150deg, #24508f, #101c3a 60%, #3a1c4d); box-shadow: inset 0 0 0 1px var(--line); }
+.thumb::after { content: attr(data-len); position: absolute; right: 4px; bottom: 4px; padding: 0 5px; border-radius: 5px; font: 600 10px var(--mono); background: rgba(0,0,0,.7); }
+.thumb.b { background: linear-gradient(150deg, #0f6b5d, #0b1730 65%); } .thumb.c { background: linear-gradient(150deg, #7a4a12, #1a1230 65%); }
+.meta { min-width: 0; flex: 1; }
+.title { font-weight: 650; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sub { margin-top: 3px; color: var(--muted); font-size: 11.5px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tag { font: 700 9.5px var(--mono); letter-spacing: .06em; padding: 1px 6px; border-radius: 5px; color: #04231d; background: var(--accent); }
+.tag.dash { background: var(--hot); color: #3a1d00; }
+.rows { margin-top: 9px; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,.28); box-shadow: inset 0 1px 3px rgba(0,0,0,.5); }
+.row { display: grid; grid-template-columns: 54px 1fr auto 30px 30px; align-items: center; gap: 6px; padding: 5px 6px 5px 10px; }
+.row + .row { border-top: 1px solid rgba(255,255,255,.05); }
+.row:hover { background: rgba(255,255,255,.04); }
+.row b { font: 700 12px var(--mono); } .row b.top { background: var(--accent); -webkit-background-clip: text; color: transparent; }
+.row span { color: var(--muted); font-size: 11.5px; } .row .sz { font-family: var(--mono); color: var(--text); }
+.mini { width: 28px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: var(--muted); background: rgba(255,255,255,.07); transition: all .15s var(--ease); }
+.mini svg { width: 13px; height: 13px; }
+.mini:hover { color: var(--text); background: rgba(255,255,255,.14); transform: translateY(-1px); }
+.mini.go { color: #04231d; background: var(--accent); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 4px 12px -4px rgba(34,227,196,.7); }
+.mini:active { transform: none; box-shadow: var(--press); }
+
+/* ---------- downloads ---------- */
+.dl .name { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barx { height: 8px; margin: 9px 0 7px; border-radius: 99px; background: rgba(0,0,0,.45); box-shadow: inset 0 1px 2px rgba(0,0,0,.7); overflow: hidden; }
+.barx i { display: block; height: 100%; border-radius: 99px; background: var(--accent); box-shadow: var(--glow); position: relative; overflow: hidden; }
+.barx i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); transform: translateX(-100%); animation: sheen 1.8s linear infinite; }
+@keyframes sheen { to { transform: translateX(100%); } }
+.barx.done i { background: linear-gradient(100deg, #7cf29a, var(--teal)); } .barx.done i::after, .barx.paused i::after { display: none; }
+.barx.paused i { background: var(--faint); box-shadow: none; }
+.stat { display: flex; justify-content: space-between; color: var(--muted); font-size: 11.5px; } .stat b { color: var(--text); font-family: var(--mono); font-weight: 600; }
+.acts { display: flex; gap: 6px; margin-top: 9px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 8px; font-weight: 600; font-size: 12px; background: rgba(255,255,255,.08); transition: all .15s var(--ease); }
+.chip:hover { background: rgba(255,255,255,.15); transform: translateY(-1px); } .chip svg { width: 12px; height: 12px; }
+
+/* ---------- settings page ---------- */
+.settings { position: absolute; inset: 0; z-index: 2; display: none; grid-template-columns: 230px 1fr; background:
+  radial-gradient(900px 500px at 0% 0%, rgba(74,168,255,.14), transparent 60%), var(--abyss); }
+.show-settings .settings { display: grid; }
+.nav { padding: 22px 12px; border-right: 1px solid var(--line); }
+.nav h2 { margin: 0 10px 14px; font-size: 18px; letter-spacing: -.01em; }
+.nav button { display: flex; align-items: center; gap: 10px; width: 100%; height: 36px; padding: 0 12px; border-radius: 10px; color: var(--muted); font-weight: 600; text-align: left; }
+.nav button:hover { background: rgba(255,255,255,.06); color: var(--text); }
+.nav button.on { color: var(--text); background: linear-gradient(180deg, var(--shelf-2), var(--shelf)); box-shadow: var(--raise); }
+.nav button.on svg { color: var(--teal); }
+.pane { overflow-y: auto; padding: 26px 34px 40px; }
+.pane h3 { margin: 0 0 4px; font-size: 20px; } .pane > p { margin: 0 0 18px; color: var(--muted); }
+.box { max-width: 720px; border-radius: 16px; margin-bottom: 16px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025)); box-shadow: var(--raise); }
+.opt { display: flex; align-items: center; gap: 16px; padding: 13px 16px; }
+.opt + .opt { border-top: 1px solid var(--line); }
+.opt div { flex: 1; min-width: 0; } .opt strong { display: block; font-weight: 650; } .opt small { color: var(--muted); font-size: 12px; }
+.field { height: 30px; padding: 0 10px; border-radius: 8px; border: 0; color: var(--text); font: 12px var(--mono); background: rgba(0,0,0,.4); box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.06); }
+select.field { font-family: var(--font); }
+.sw { width: 42px; height: 24px; border-radius: 99px; position: relative; background: rgba(0,0,0,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.7); transition: background .2s; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(#fff, #c9d6ee); box-shadow: 0 2px 5px rgba(0,0,0,.5); transition: transform .2s var(--ease); }
+.sw.on { background: var(--accent); box-shadow: inset 0 1px 2px rgba(0,0,0,.3), var(--glow); } .sw.on::after { transform: translateX(18px); }
+input[type=range] { width: 180px; accent-color: var(--teal); }
+.themes { display: flex; gap: 10px; }
+.sw-theme { width: 54px; height: 36px; border-radius: 10px; box-shadow: var(--raise); position: relative; }
+.sw-theme.on { outline: 2px solid var(--text); outline-offset: 2px; }
+.t-sea { background: linear-gradient(120deg, #22e3c4, #4aa8ff); } .t-ember { background: linear-gradient(120deg, #ffb547, #ff6b7a); }
+.t-aurora { background: linear-gradient(120deg, #7cf29a, #a78bfa); } .t-slate { background: linear-gradient(120deg, #9fb4d8, #2a2e38); }
+.btn { height: 30px; padding: 0 14px; border-radius: 9px; font-weight: 650; background: rgba(255,255,255,.09); box-shadow: var(--raise); }
+.btn.primary { color: #04231d; background: var(--accent); }
+.btn:active { box-shadow: var(--press); }
+</style>
+</head>
+<body>
+<div class="win" id="win">
+  <div class="tabs">
+    <svg class="brand" viewBox="0 0 1024 1024" style="stroke:none"><rect width="1024" height="1024" rx="230" fill="#0b1730"/><path fill="#9af5e6" d="M512 600C420 520 300 410 132 262c64-4 126 8 186 34-34-38-54-74-64-110 122 76 216 180 258 284zM512 600c92-80 212-190 380-338-64-4-126 8-186 34 34-38 54-74 64-110-122 76-216 180-258 284z"/><path fill="#eafffb" d="M512 250c88 130 98 290 48 410-12 30-30 46-48 52-18-6-36-22-48-52-50-120-40-280 48-410z"/><path fill="#ffb547" d="M476 676c22-8 50-8 72 0-8 40-20 76-36 114-16-38-28-74-36-114z"/><path d="M300 880h424" stroke="#22e3c4" stroke-width="46" stroke-linecap="round"/></svg>
+    <div class="tab on"><i class="fav"></i><span>Big Brother Episode 166</span><b class="n">3</b></div>
+    <div class="tab"><i class="fav" style="background:var(--accent)"></i><span>Raised by Demons E17</span></div>
+    <button class="add" title="New tab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <div class="wctl">
+      <button class="wbtn"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+      <button class="wbtn"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
+      <button class="wbtn x"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="ib"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button class="ib"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="ib"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v5h5"/></svg></button>
+    <div class="addr"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>anime4i.com<em>/big-brother-episode-166-english-subtitles</em></span></div>
+    <div class="route"><i></i>Secure DNS</div>
+    <button class="ib on" title="Media"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></svg><b class="dot">3</b></button>
+    <button class="ib" title="Downloads"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg></button>
+    <button class="ib" title="Scripts"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></svg></button>
+    <button class="ib" id="gear" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.3l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.4a7 7 0 0 0-2.2 1.3l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2.6l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2.2 1.3L10 21h4l.4-2.4a7 7 0 0 0 2.2-1.3l2.3.9 2-3.4-2-1.5c.1-.4.1-.9.1-1.3z"/></svg></button>
+  </div>
+
+  <div class="body" id="body">
+    <div class="page">
+      <h1>Big Brother Episode 166</h1>
+      <p>The page stays as it is. BM Osprey watches what its player loads and lists it on the right.</p>
+      <div class="player"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="track"><i></i></div></div>
+    </div>
+
+    <aside class="panel">
+      <div class="seg"><button class="on">Media</button><button>Downloads</button><button>Network</button></div>
+      <div class="scroll">
+        <details class="group" open>
+          <summary><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Video<b>1</b></summary>
+          <div class="card">
+            <div class="head">
+              <div class="thumb" data-len="15:34"></div>
+              <div class="meta">
+                <div class="title">Big Brother EP166 English Subtitles</div>
+                <div class="sub"><span class="tag">HLS</span>dailymotion.com · 5 qualities · 2 subtitles</div>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row"><b class="top">1080p</b><span>6.2 Mbps · with sound</span><span class="sz">692 MB</span><button class="mini" title="Preview"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button><button class="mini go" title="Download"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg></button></div>
+              <div class="row"><b>720p</b><span>2.1 Mbps · with sound</span><span class="sz">239 MB</span><button class="mini"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button><button class="mini"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg></button></div>
+              <div class="row"><b>480p</b><span>836 kbps · with sound</span><span class="sz">93 MB</span><button class="mini"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button><button class="mini"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg></button></div>
+            </div>
+          </div>
+        </details>
+        <details class="group" open>
+          <summary><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Downloading<b>2</b></summary>
+          <div class="card dl">
+            <div class="name">Big Brother EP166 1080p.mp4</div>
+            <div class="barx"><i style="width:64%"></i></div>
+            <div class="stat"><span><b>443 MB</b> of 692 MB</span><span><b>4.8 MB/s</b> · 52 s left</span></div>
+            <div class="acts"><button class="chip"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>Pause</button><button class="chip"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play so far</button></div>
+          </div>
+          <div class="card dl">
+            <div class="name">Raised by Demons E17 720p.mp4</div>
+            <div class="barx done"><i style="width:100%"></i></div>
+            <div class="stat"><span><b>231 MB</b> · done</span><span>saved to Videos</span></div>
+          </div>
+        </details>
+        <details class="group"><summary><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Audio<b>2</b></summary></details>
+        <details class="group"><summary><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Images<b>14</b></summary></details>
+        <details class="group"><summary><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>Unidentified<b>1</b></summary></details>
+      </div>
+    </aside>
+
+    <!-- Settings: opens over the page, like a browser's own settings tab -->
+    <section class="settings">
+      <nav class="nav">
+        <h2>Settings</h2>
+        <button class="on"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Downloads</button>
+        <button><svg viewBox="0 0 24 24"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></svg>Performance</button>
+        <button><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Privacy and network</button>
+        <button><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v6l-4-2v-4z"/></svg>Ad and content filters</button>
+        <button><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></svg>Scripts and extensions</button>
+        <button><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg>Appearance</button>
+        <button><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>About</button>
+      </nav>
+      <div class="pane">
+        <h3>Downloads</h3>
+        <p>Where files go and how hard BM Osprey pulls them.</p>
+        <div class="box">
+          <div class="opt"><div><strong>Save to</strong><small>Sorted into Video, Music and Other inside this folder</small></div><input class="field" value="C:\Users\you\Videos\BM Osprey" size="30"><button class="btn">Change</button></div>
+          <div class="opt"><div><strong>Connections per download</strong><small>More is faster, and easier for a site to notice</small></div><input type="range" min="1" max="32" value="8"><span style="font-family:var(--mono)">8</span></div>
+          <div class="opt"><div><strong>Speed limit</strong><small>Shared by all downloads</small></div><select class="field"><option>None</option><option>2 MB/s</option></select></div>
+          <div class="opt"><div><strong>Downloads at the same time</strong></div><select class="field"><option>3</option></select></div>
+          <div class="opt"><div><strong>Carry on after a crash or restart</strong><small>Unfinished downloads pick up where they stopped</small></div><button class="sw on"></button></div>
+          <div class="opt"><div><strong>Keep running in the tray when the window closes</strong></div><button class="sw"></button></div>
+        </div>
+        <h3 style="font-size:16px;margin-top:22px">Appearance</h3>
+        <p>Pick a colour. The switch below turns blur and motion off for slower machines.</p>
+        <div class="box">
+          <div class="opt"><div><strong>Theme</strong><small>Sea, Ember, Aurora, Slate</small></div>
+            <div class="themes">
+              <button class="sw-theme t-sea on" data-t=""></button><button class="sw-theme t-ember" data-t="ember"></button>
+              <button class="sw-theme t-aurora" data-t="aurora"></button><button class="sw-theme t-slate" data-t="slate"></button>
+            </div></div>
+          <div class="opt"><div><strong>Reduce effects</strong><small>No blur, glow or animation. Uses less CPU and GPU</small></div><button class="sw" id="calm"></button></div>
+          <div class="opt"><div><strong>Hardware acceleration</strong><small>Turn off if video flickers. Needs a restart</small></div><button class="sw on"></button></div>
+        </div>
+        <button class="btn primary">Export settings</button> <button class="btn">Import</button>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+  const root = document.documentElement;
+  document.getElementById('gear').onclick = (e) => {
+    const on = document.getElementById('body').classList.toggle('show-settings');
+    e.currentTarget.classList.toggle('on', on);
+  };
+  if (location.hash.includes('settings')) document.getElementById('gear').click();
+  document.querySelectorAll('.sw').forEach((s) => s.addEventListener('click', () => {
+    s.classList.toggle('on');
+    if (s.id === 'calm') root.classList.toggle('calm', s.classList.contains('on'));
+  }));
+  document.querySelectorAll('.sw-theme').forEach((b) => b.onclick = () => {
+    document.querySelectorAll('.sw-theme').forEach((x) => x.classList.toggle('on', x === b));
+    if (b.dataset.t) root.dataset.theme = b.dataset.t; else delete root.dataset.theme;
+  });
+  const m = location.hash.match(/theme=(\w+)/); if (m) root.dataset.theme = m[1];
+</script>
+</body>
+</html>

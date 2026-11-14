@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/remote-schema.json",
+  "identifier": "tabs",
+  "description": "Web pages in tabs may only report media they play, forward browser shortcuts, and reach gm_call, which checks each user script call against that script's own header. Nothing else.",
+  "webviews": ["tab-*"],
+  "remote": {
+    "urls": ["https://*", "http://*", "https://*:*", "http://*:*"]
+  },
+  "permissions": ["allow-media-found", "allow-tab-shortcut", "allow-gm-call"]
+}
